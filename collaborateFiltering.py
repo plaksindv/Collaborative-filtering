@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 from sklearn.model_selection import train_test_split as tts
@@ -24,6 +25,7 @@ n_movies = len(ratings_df_sample['movieId'].unique())
 
 movie_ids = ratings_df_sample['movieId'].unique()
 
+
 def scale_movie_id(movie_id):
     scaled = np.where(movie_ids == movie_id)[0][0] + 1
     return scaled
@@ -35,6 +37,7 @@ train_data, test_data = tts(ratings_df_sample, test_size=0.2)
 
 print('Train shape: {}'.format(train_data.shape))
 print('Test shape: {}'.format(test_data.shape))
+
 
 def rmse(prediction, ground_truth):
     prediction = np.nan_to_num(prediction)[ground_truth.nonzero()].flatten()
@@ -60,6 +63,8 @@ print(distance.cosine([3, 3],[1, 3]))
 
 ta = [[5,5,5,0,0], [4,1,0,5,3], [1,0,0,5,0], [5,0,5,0,4]]
 pairwise_distances(demo_data, metric='cosine')
+
+
 def naive_predict(top):
     top_similar_ratings = np.zeros((n_users, top, n_movies))
 
@@ -94,6 +99,7 @@ print('User-based CF RMSE: ', rmse(naive_pred, test_data_matrix))
 
 naive_pred_item = naive_predict_item(7)
 print('Item-based CF RMSE: ', rmse(naive_pred_item, test_data_matrix))
+
 
 def k_fract_predict(top):
     top_similar = np.zeros((n_users, top))
@@ -157,6 +163,7 @@ print('User-based CF RMSE: ', rmse(k_predict, test_data_matrix))
 k_predict_item = k_fract_predict_item(7)
 print('Item-based CF RMSE: ', rmse(k_predict_item, test_data_matrix))
 
+
 def k_fract_mean_predict(top):
     top_similar = np.zeros((n_users, top))
     
@@ -183,6 +190,7 @@ def k_fract_mean_predict(top):
         
     return pred
 
+
 def k_fract_mean_predict_item(top):
     top_similar = np.zeros((n_movies, top))
     
@@ -201,9 +209,8 @@ def k_fract_mean_predict_item(top):
         numerator = item_similarity[i][indexes]
         
         mean_rating = np.array([x for x in train_data_matrix.T[i] if x > 0]).mean()
-        mean_rating = 0 if np.isnan(mean_rating) else mean_rating
-        
-        diff_ratings = train_data_matrix.T[indexes] - mean_rating
+		mean_rating = 0 if np.isnan(mean_rating) else mean_rating
+		diff_ratings = train_data_matrix.T[indexes] - train_data_matrix.T[indexes].mean()
         numerator = numerator.dot(diff_ratings)
         denominator = abs_sim[i][top_similar[i].astype(np.int)].sum()
         denominator = denominator if denominator != 0 else 1
